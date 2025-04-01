@@ -16,7 +16,7 @@ class LicensePlate:
         lp_model_threshold = 0.5
 
         # Run model against image
-        results = self.model.predict(image, imgsz=640, verbose=False)[0]
+        result = self.model.predict(image, imgsz=640, verbose=False)[0]
 
         x1, y1, x2, y2, score, class_id = result.boxes.data.tolist()[0]
 

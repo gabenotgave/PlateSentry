@@ -10,21 +10,59 @@ import types
 sel = selectors.DefaultSelector()
 
 def main():
-
-    host, port = sys.argv[1], int(sys.argv[2])
-    lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    lsock.bind((host, port))
-    lsock.listen()
+    host, port = "127.0.0.1", 65432
+    welcome_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    welcome_socket.bind((host, port))
+    welcome_socket.listen()
     print(f"Listening on {(host, port)}")
-    lsock.setblocking(False)
-    sel.register(lsock, selectors.EVENT_READ, data=None)
+    welcome_socket.setblocking(False)
+    sel.register(welcome_socket, selectors.EVENT_READ, data=None)
 
-    
+    try:
+        while True:
+            events = sel.select(timeout=None)
+            for key, mask in events:
+                if key.data is None:
+                    accept_wrapper(key.fileobj)
+                else:
+                    service_connection(key, mask)
+    except KeyboardInterrupt:
+        print("Caught keyboard interrupt, exiting")
+    finally:
+        sel.close()
 
+def accept_wrapper(connection_socket):
+    conn, addr = connection_socket.accept()
+    print(f"Accepted connection from {addr}")
+    conn.setblocking(False)
+    data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
+    events = selectors.EVENT_READ | selectors.EVENT_WRITE
+    sel.register(conn, events, data=data)
+
+def service_connection(key, mask):
+    connection_socket = key.fileobj
+    data = key.data
+    if mask & selectors.EVENT_READ:
+        recv_data = connection_socket.recv(1024)
+        if recv_data:
+            data.outb += process_image("sijsdfsdf").encode('utf-8') # Returns license plate number
+            print(recv_data, data.outb)
+        else:
+            print(f"Closing connection to {data.addr}")
+            sel.unregister(connection_socket)
+            connection_socket.close()
+    if mask & selectors.EVENT_WRITE:
+        if data.outb:
+            print(f"Echoing {data.outb!r} to {data.addr}")
+            sent = connection_socket.send(data.outb)
+            data.outb = data.outb[sent:]
+
+def process_image(base64encoding):
+    # TODO: convert base 64 to image
     image_filename = "image.png"
     output_image_filename = "processed_image.jpg"
     license_plate_text = get_license_plate_number(image_filename, output_image_filename)
-    
+    return license_plate_text
 
 def get_license_plate_number(image_filename, output_image_filename):
     # Read image
