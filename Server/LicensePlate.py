@@ -16,9 +16,11 @@ class LicensePlate:
         lp_model_threshold = 0.5
 
         # Run model against image
-        result = self.model.predict(image, imgsz=640, verbose=False)[0]
-
-        x1, y1, x2, y2, score, class_id = result.boxes.data.tolist()[0]
+        result = self.model.predict(image, imgsz=640, verbose=False)
+        if len(result[0].boxes.data.tolist()) == 0:
+            return None
+        
+        x1, y1, x2, y2, score, class_id = result[0].boxes.data.tolist()[0]
 
         # LP model must be >50% confident
         if score > lp_model_threshold:

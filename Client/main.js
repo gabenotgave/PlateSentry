@@ -1,27 +1,50 @@
-const net = require('net');
+class TcpClientReport {
+  constructor() {
+      this.socket = null;
+      this.connectionState = 'disconnected';
+  }
 
-// Create a TCP socket client
-const client = new net.Socket();
+  connect() {
+      return new Promise((resolve, reject) => {
+          this.connectionState = 'connecting';
+          this.socket = new WebSocket('ws://localhost:65432');
 
-// Connect to local server
-client.connect(65432, '127.0.0.1', () => {
-  console.log('Connected to server');
-  
-  // Send data to server
-  client.write('Test');
-});
+          // Add these headers if needed
+          this.socket.onopen = () => {
+              this.connectionState = 'connected';
+              console.log('WebSocket connected');
+              resolve();
+          };
 
-// Receive data from server
-client.on('data', (data) => {
-  console.log('Received:', data.toString());
-});
+          this.socket.onerror = (error) => {
+              this.connectionState = 'error';
+              console.error('WebSocket error:', {
+                  type: error.type,
+                  readyState: this.socket?.readyState,
+                  url: this.socket?.url
+              });
+              reject(error);
+          };
 
-// Handle connection close
-client.on('close', () => {
-  console.log('Connection closed');
-});
+          this.socket.onclose = (event) => {
+              this.connectionState = 'disconnected';
+              console.log('WebSocket closed:', {
+                  code: event.code,
+                  reason: event.reason,
+                  wasClean: event.wasClean
+              });
+          };
 
-// Handle errors
-client.on('error', (err) => {
-  console.error('Connection error:', err);
-});
+          // Add this to track handshake
+          this.socket.onmessage = (event) => {
+              if (event.data === "CONNECTION_ACCEPTED") {
+                  console.log("Server accepted connection");
+              }
+          };
+      });
+  }
+
+  // ... rest of your methods ...
+}
+
+export default TcpClientReport;

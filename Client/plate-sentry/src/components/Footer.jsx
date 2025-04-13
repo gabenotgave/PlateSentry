@@ -1,6 +1,6 @@
 const Footer = () => {
     return (
-        <small className="footer">© Plate Sentry - Gabriel Arnold & Youssif Goda</small>
+        <div className="mb-4"><small className="footer">© Plate Sentry - Gabriel Arnold & Youssif Goda</small></div>
     )
 }
 

@@ -8,7 +8,7 @@ const Nav = () => {
     return (
         <nav className="navbar navbar-expand-lg bg-primary mb-5" data-bs-theme="dark">
             <div className="container-fluid justify-content-center">
-                <a className="navbar-brand" href="">
+                <a className="navbar-brand" href="/">
                     <img width="400" src={logo} />
                 </a>
             </div>
