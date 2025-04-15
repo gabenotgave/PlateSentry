@@ -9,9 +9,10 @@ import Status from "../components/Status.jsx";
 
 const HomePage = () => {
 
+    // Change title
     document.title = "Plate Sentry - Report Car";
-    document.querySelector('link[rel="icon"]').setAttribute("icon", "../assets/favicon.icon");
 
+    // Define states so that re-render occurs for variable updates
     const [showError, setShowError] = useState(false);
     const [errorDescription, setErrorDescription] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +22,11 @@ const HomePage = () => {
     const [dateTimeReported, setDateTimeReported] = useState(null);
     const [isConnectedToServer, setIsConnectedToServer] = useState(false);
 
+    // Create TCP connection with client
     const tcpClientRef = useRef(null);
     useEffect(() => {
         const client = new TcpClientReport();
+        // Connect with 'reporter' HTTP cookie
         client.connect('reporter').then(() => {
             setIsConnectedToServer(true);
         });
@@ -35,10 +38,12 @@ const HomePage = () => {
         };
     }, []);
 
+    // For front-end validation
     const isNullOrWhitespace = (input) => {
         return !input || !input.trim();
     }
 
+    // Front-end validation
     const isReportPlateValid = (report) => {
         if (isNullOrWhitespace(report.photoValue)) {
             return { isValid: false, reason: "Photo is required" };
@@ -51,9 +56,11 @@ const HomePage = () => {
         return { isValid: true };
     }
 
+    // On report plate form submission
     const reportPlate = async (event) => {
         event.preventDefault();
 
+        // Build JSON
         const report = {
             photoValue: document.getElementById("photoField").value,
             photo: document.getElementById("photoField").files[0],
@@ -62,8 +69,8 @@ const HomePage = () => {
             email: document.getElementById("emailField").value
         }
 
+        // Check model state validity
         const modelState = isReportPlateValid(report)
-
         if (modelState.isValid) {
 
             setIsLoading(true);
@@ -76,6 +83,7 @@ const HomePage = () => {
                 email: report.email
             }));
 
+            // Send report to server
             tcpClientRef.current.setOnMessageCallback((msg) => {
                 if (msg.status === 'success') {
                     setCroppedReportedPhoto(msg.cropped_photo);

@@ -6,9 +6,10 @@ import { formatDateTime } from "../utility/date";
 import ReportModal from "../components/ReportModal";
 
 const ReportsPage = () => {
-
+    // Update title
     document.title = "Plate Sentry - View Reports";
 
+    // Define states
     const [isLoading, setIsLoading] = useState(true);
     const [isConnectedToServer, setIsConnectedToServer] = useState(false);
     const [isArchiveSuccessful, setIsArchiveSuccessful] = useState(true);
@@ -16,10 +17,13 @@ const ReportsPage = () => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [rpt, setRpt] = useState({});
 
+    // Create TCP connection
     const tcpClientRef = useRef(null);
     useEffect(() => {
         const client = new TcpClientReport();
+        // Add officer HTTP cookie
         client.connect('officer').then(() => {
+            // Listen for new reports from server (supports live updates/report filings)
             setIsConnectedToServer(true);
             client.setOnMessageCallback((reports) => {
                 if (Array.isArray(reports)) {

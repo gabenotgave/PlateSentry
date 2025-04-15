@@ -7,17 +7,18 @@ class TcpClientReport {
   
     connect(role) {
         return new Promise((resolve, reject) => {
-            this.connectionState = 'connecting';
+            this.connectionState = 'connecting'; // Change connection state
+            // Add cookie
             document.cookie = 'Role=' + role;
             this.socket = new WebSocket('ws://localhost:65432');
   
-            // Add these headers if needed
             this.socket.onopen = () => {
                 this.connectionState = 'connected';
                 console.log('WebSocket connected');
                 resolve();
             };
-  
+
+            // Handle errors
             this.socket.onerror = (error) => {
                 this.connectionState = 'error';
                 console.error('WebSocket error:', {
@@ -27,7 +28,8 @@ class TcpClientReport {
                 });
                 reject(error);
             };
-  
+
+            // Handle connection closure
             this.socket.onclose = (event) => {
                 this.connectionState = 'disconnected';
                 console.log('WebSocket closed:', {
@@ -57,7 +59,8 @@ class TcpClientReport {
             };
         });
     }
-  
+
+    // Send message to server
     sendMessage(msg) {
         if (this.socket && this.connectionState === 'connected') {
             this.socket.send(msg);
@@ -67,6 +70,7 @@ class TcpClientReport {
         }
     }
 
+    // Send message once connection made with server
     async sendMessageWhenReady(msg) {
         if (this.connectionState !== 'connected') {
             await this.connect();
@@ -74,6 +78,7 @@ class TcpClientReport {
         this.sendMessage(msg);
     }
 
+    // Listen for messages from server (callback function)
     setOnMessageCallback(callback) {
         this.onMessage = callback;
     }
