@@ -1,0 +1,7 @@
+asyncio
+websockets
+opencv-python
+pillow
+numpy
+ultralytics
+paddleocr
